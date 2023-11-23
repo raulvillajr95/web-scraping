@@ -1,32 +1,20 @@
-# import socket
+# import urllib3
+# from lxml import html
 
-# print("hello world")
+# # urlib3 section
+# http = urllib3.PoolManager()
+# r = http.request('GET', 'http://www.google.com')
 
-# HOST = 'www.google.com'
-# PORT = 80
+# data_string = r.data.decode('utf-8', errors='ignore')
 
-# client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# server_address = (HOST, PORT)
-# client_socket.connect(server_address)
+# tree = html.fromstring(data_string)
 
-# request_header = b'GET / HTTP/1.0\1.0\r\nHost: www.google.com\r\n\r\n'
-# client_socket.sendall(request_header)
+# links = tree.xpath('//a')
 
-# response = ''
-# while True:
-#   recv = client_socket.recv(1024)
-#   if not recv:
-#     break
-#   response += str(recv)
+# for link in links:
+#   print(link.get('href'))
 
-# print(response)
-# client_socket.close()
+import requests
 
-import re
-
-html_content = '<p>Price : khjkh19.99$</p>'
-
-m = re.match('<p>(.+)<\/p>', html_content)
-
-if m:
-  print(m.group(1))
+r = requests.get('https://www.google.com')
+print(r.text)
