@@ -1,0 +1,3 @@
+Goal:
+-run through Chaffey calendar of events
+return "<Department> <Headline> <date(mm/dd/yy)> <time>"

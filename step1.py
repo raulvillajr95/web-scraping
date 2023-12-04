@@ -1,20 +1,13 @@
-# import urllib3
-# from lxml import html
-
-# # urlib3 section
-# http = urllib3.PoolManager()
-# r = http.request('GET', 'http://www.google.com')
-
-# data_string = r.data.decode('utf-8', errors='ignore')
-
-# tree = html.fromstring(data_string)
-
-# links = tree.xpath('//a')
-
-# for link in links:
-#   print(link.get('href'))
-
+from bs4 import BeautifulSoup
 import requests
+import os, os.path, csv
 
-r = requests.get('https://www.google.com')
-print(r.text)
+listingurl = "http://www.google.com"
+
+response = requests.get(listingurl)
+soup = BeautifulSoup(response.text, "html.parser")
+
+listings = []
+for rows in soup.find_all("div"):
+  print(rows)
+  print('\n')
