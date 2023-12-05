@@ -1,13 +1,12 @@
-from bs4 import BeautifulSoup
 import requests
-import os, os.path, csv
+from bs4 import BeautifulSoup
 
-listingurl = "http://www.google.com"
+URL = "https://realpython.github.io/fake-jobs/"
+response = requests.get(URL)
+page = requests.get(URL)
 
-response = requests.get(listingurl)
-soup = BeautifulSoup(response.text, "html.parser")
+soup = BeautifulSoup(page.content, "html.parser")
 
-listings = []
-for rows in soup.find_all("div"):
-  print(rows)
-  print('\n')
+results = soup.find(id="ResultsContainer")
+
+print(results.prettify())
