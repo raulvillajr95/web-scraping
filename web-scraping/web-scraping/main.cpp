@@ -1,60 +1,52 @@
 #include <iostream>
 #include <string>
-#include <curl/curl.h>
 #include <gumbo.h>
 
-using namespace std;
+void extractTextFromH1(GumboNode* node) {
+    if (!node || node->type != GUMBO_NODE_ELEMENT) {
+        return;
+    }
 
-size_t WriteCallback(void* contents, size_t size, size_t nmemb, string* output)
-{
-   size_t totalSize = size * nmemb;
-   output->append(static_cast<char*>(contents), totalSize);
-   return totalSize;
+    if (node->v.element.tag == GUMBO_TAG_H1) {
+        if (node->v.element.children.length > 0) {
+            GumboNode* textNode = static_cast<GumboNode*>(node->v.element.children.data[0]);
+            if (textNode && textNode->type == GUMBO_NODE_TEXT) {
+                std::cout << textNode->v.text.text << std::endl;
+            }
+        }
+    }
+
+    if (node->v.element.children.data) {
+        GumboVector children = node->v.element.children;
+        for (unsigned int i = 0; i < children.length; ++i) {
+            extractTextFromH1(static_cast<GumboNode*>(children.data[i]));
+        }
+    }
 }
 
-void parseAndPrintHTML(const string& htmlContent)
-{
-   GumboOutput* output = gumbo_parse(htmlContent.c_str());
-   
-   GumboNode* root = output->root;
-   for (unsigned int i = 0; i < root->v.element.children.length; ++i)
-   {
-      GumboNode* child = static_cast<GumboNode*>(root->v.element.children.data[i]);
-      if (child->type == GUMBO_NODE_ELEMENT)
-      {
-         cout << "Tag: " << gumbo_normalized_tagname(child->v.element.tag) << endl;
-      }
-   }
-   
-   gumbo_destroy_output(&kGumboDefaultOptions, output);
-}
+int main() {
+    const char* html = R"(
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Hello HTML</title>
+        </head>
+        <body>
+            <h1>Hello, World!</h1>
+        </body>
+        </html>
+    )";
 
-int main()
-{
-   CURL* curl = curl_easy_init();
-   if (!curl)
-   {
-      cerr << "Error initializing libcurl" << endl;
-      return 1;
-   }
-   
-   curl_easy_setopt(curl, CURLOPT_URL, "https://www.google.com");
-   
-   string htmlContent;
-   
-   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-   curl_easy_setopt(curl, CURLOPT_WRITEDATA, &htmlContent);
-   
-   CURLcode res = curl_easy_perform(curl);
-   if (res != CURLE_OK)
-   {
-      cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res) << endl;
-      return 1;
-   }
-   
-   parseAndPrintHTML(htmlContent);
-   
-   curl_easy_cleanup(curl);
-   
-   return 0;
+    GumboOutput* output = gumbo_parse(html);
+
+    if (output && output->root) {
+        extractTextFromH1(output->root);
+    } else {
+        std::cerr << "Error parsing HTML" << std::endl;
+    }
+    gumbo_destroy_output(&kGumboDefaultOptions, output);
+
+    return 0;
 }
